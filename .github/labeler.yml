@@ -1,0 +1,12 @@
+feature:
+  - changed-files:
+    - any-glob-to-any-file: 'src/**/*'
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.md', 'docs/**/*']
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: ['project.toml', 'requirements*.txt']
+chore:
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**/*'

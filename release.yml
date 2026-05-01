@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for release'
+        required: false
+        default: 'Regular update'
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Extract version from project.toml
+        id: versioning
+        run: |
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('project.toml', 'rb'))['project']['version'])")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        env:
+          TAG: v${{ steps.versioning.outputs.VERSION }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Skipping."
+          else
+            git tag -a "$TAG" -m "Release $TAG: ${{ github.event.inputs.reason }}"
+            git push origin "$TAG"
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.versioning.outputs.VERSION }}
+          name: Release v${{ steps.versioning.outputs.VERSION }}
+          body: "Reason: ${{ github.event.inputs.reason }}"
+          generate_release_notes: true

@@ -1,0 +1,24 @@
+name: Ruff PR Review
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  ruff-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ruff Check with Reviewdog
+        uses: reviewdog/action-ruff@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Report as comments on the PR diff
+          reporter: github-pr-review
+          # Only report issues in the lines changed in the PR
+          filter_mode: added
+          ruff_args: "--select=ANN,D"

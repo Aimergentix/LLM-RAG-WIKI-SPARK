@@ -1,0 +1,54 @@
+# RAG runtime configuration — canonical default (M7).
+# Edit this file to configure the RAG layer for your deployment.
+# All relative paths resolve from this file's directory.
+schema_version: 1
+
+project:
+  name: local-wiki-rag
+  role: local_markdown_rag
+  version: 1.2.0
+
+runtime:
+  python_min: "3.11"
+  log_format: jsonl
+
+domain:
+  name: generic
+
+embedding:
+  provider: sentence-transformers
+  model_id: sentence-transformers/all-MiniLM-L6-v2
+  normalize_embeddings: true
+
+paths:
+  wiki_root: ./wiki
+  index_dir: ./data/chroma
+  manifest_path: ./data/manifests/manifest.json
+
+reranking:
+  enabled: true
+  model_id: cross-encoder/ms-marco-MiniLM-L-6-v2
+  top_n: 10
+
+chunking:
+  strategy: heading_aware
+  min_chars: 300
+  max_chars: 1200
+
+indexing:
+  atomic_reindex: true
+
+retrieval:
+  top_k: 5
+  distance_metric: cosine
+  min_score: 0.72
+  ood_threshold: 0.3
+  mmr_enabled: true # P5: Maximal Marginal Relevance for diversity
+  mmr_lambda: 0.7 # P5: Balance relevance (higher) vs diversity (lower)
+
+snapshot: # P5: Backup ChromaDB index and manifest
+  enabled: true
+  backup_dir: ./data/snapshots
+
+privacy:
+  block_secret_chunks: true

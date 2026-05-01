@@ -1,0 +1,19 @@
+version: 2
+registries:
+  python-private:
+    type: python-index
+    url: https://your-private-registry.com/simple
+    token: ${{secrets.PRIVATE_PYPI_TOKEN}}
+
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    registries:
+      - python-private
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

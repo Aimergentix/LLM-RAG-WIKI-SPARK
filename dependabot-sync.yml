@@ -1,0 +1,40 @@
+name: Dependabot Sync
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  sync-requirements:
+    # Only run for Dependabot PRs
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Check out the head of the PR to allow pushing back
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-tools
+        run: pip install pip-tools
+
+      - name: Regenerate requirements files
+        env:
+          PIP_EXTRA_INDEX_URL: https://__token__:${{secrets.PRIVATE_PYPI_TOKEN}}@your-private-registry.com/simple
+        run: |
+          pip-compile --extra rag --extra mcp --output-file=requirements.txt project.toml
+          pip-compile --all-extras --output-file=requirements-dev.txt project.toml
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add requirements.txt requirements-dev.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update requirements via pip-compile" && git push)

@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.2
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: pip-compile-sync
+        name: Regenerate requirements.txt from project.toml
+        entry: bash -c "pip-compile --extra rag --extra mcp --output-file=requirements.txt project.toml && pip-compile --all-extras --output-file=requirements-dev.txt project.toml"
+        language: system
+        files: ^project\.toml$
+        pass_filenames: false
+
+      - id: sync-requirements-check
+        name: Check if requirements files match project.toml
+        entry: python3 -c "import tomllib, re; p=tomllib.load(open('project.toml','rb'))['project']; d=list(p.get('dependencies',{}).keys()); [d.extend(g) for g in p.get('optional-dependencies',{}).values()]; n={re.split('[^a-zA-Z0-9_-]', x)[0].lower() for x in d}; r=open('requirements-dev.txt').read().lower(); [exit(1) for x in n if x not in r]; print('Sync OK')"
+        language: system
+        files: ^(project\.toml|requirements\.txt|requirements-dev\.txt)$
+        pass_filenames: false
+      - id: pytest-local
+        name: Run local tests
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true

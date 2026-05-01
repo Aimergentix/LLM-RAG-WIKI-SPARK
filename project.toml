@@ -1,0 +1,63 @@
+schema = "project.toml/v1"
+
+[project]
+name = "llm-rag-wiki"
+version = "2.0.0-alpha"
+kind = "AI pipeline"
+type = "wiki+rag+mcp"
+summary = "Consolidated three-layer local pipeline: wiki builder, RAG retrieval, MCP persona delivery."
+
+[release]
+channel = "dev"
+date = "2026-05-01"
+
+[maintainer]
+name = "Aranda Möller"
+email = "amoeller@mailbox.org"
+
+[compat]
+python = "3.11"
+platforms = ["linux", "windows", "macos"]
+
+[project.dependencies]
+PyYAML = ">=6.0.1"
+
+[project.optional-dependencies]
+rag = [
+    "chromadb>=0.5.0",
+    "sentence-transformers>=3.0.0"
+]
+mcp = [
+    "mcp>=1.0.0"
+]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.4.0"
+]
+
+[tool.ruff]
+# Set the maximum line length
+line-length = 100
+# Target Python 3.11 as defined in [compat]
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable Pyflakes (F), Pycodestyle (E, W), isort (I), flake8-bugbear (B), flake8-copyright (CPY), annotations (ANN), unused arguments (ARG), and pydocstyle (D)
+select = ["E", "F", "W", "I", "B", "CPY", "ANN", "ARG", "D"]
+# Ignore D100 (missing docstring) and redundant annotations for self/cls
+ignore = ["D100", "ANN101", "ANN102"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore missing docstrings and type annotations in test files
+"tests/**/*" = ["D", "ANN"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["wiki"]
+
+[tool.ruff.lint.flake8-copyright]
+# Check for copyright notice in the first 5 lines
+notice-rgx = "(?i)# Copyright \\(c\\) 2026 Aranda Möller"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
